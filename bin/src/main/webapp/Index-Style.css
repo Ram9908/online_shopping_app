@@ -1,0 +1,70 @@
+.back{
+
+   height: 500px;
+   background-image: linear-gradient(rgb(251, 236, 163) , white);
+}
+.m{
+    padding-top: 200px;
+    padding-left: 100px;
+
+}
+.n img{
+	
+    height: 450px;
+    width: 650px;
+}
+.n{
+   
+    padding-top: 100px;
+    padding-left: 400px;
+    margin-right: 100px;
+
+}
+@keyframes bg{
+    from{ background-image: linear-gradient(rgb(251, 236, 163) , white);}
+    from{ background-image: linear-gradient(rgb(246, 188, 229) , white);}
+}
+.back{
+    animation-name: bg;
+    animation-duration: 5s;
+    animation-iteration-count: 5;
+}
+
+.c{
+    height: 700px;
+    margin-top: 100px;
+}
+@keyframes b{
+    from{ background-image: linear-gradient(rgb(203, 243, 130) , white);}
+    to{ background-image: linear-gradient(rgb(194, 188, 246) , white);}
+}
+.c{
+    animation-name: b;
+    animation-duration: 5s;
+    animation-iteration-count: 5;
+}
+.forms input{
+    width: 360px;
+    background-image: rgba(215, 212, 212, 0.704);
+    border: 2px solid rgb(55, 182, 95);
+    padding: 7px;
+    border-radius: 6px;
+}
+.min-body{
+	width:100%;
+	background-image: linear-gradient(rgb(251, 236, 163) , white);
+	height:500px;
+	display : flex;
+	justify-content: center;
+    align-items: center;
+}
+ .min-body .imaget img{
+	max-width:700px;
+    max-height: 400px;
+    border-radius:20px;
+    align-items:left;
+}
+.min-body .text-content {
+        max-width: 800px; 
+        text-align: center; 
+}
