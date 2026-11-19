@@ -54,5 +54,6 @@ public class LoginController {
 		mv.addObject("error", "Invalid email, password, or role");
 		mv.setViewName("error_view");
 		return mv;
+		// Add error handling for invalid role
 	}
 }
