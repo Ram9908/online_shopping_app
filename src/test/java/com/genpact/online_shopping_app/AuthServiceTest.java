@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.genpact.online_shopping_app.entity.Role;
 import com.genpact.online_shopping_app.entity.User;
+import com.genpact.online_shopping_app.repository.BlockedEmailRepository;
 import com.genpact.online_shopping_app.repository.UserRepository;
 import com.genpact.online_shopping_app.repository.VendorRepository;
 import com.genpact.online_shopping_app.service.AuthService;
@@ -30,13 +31,16 @@ class AuthServiceTest {
 	private UserRepository userRepository;
 	@Mock
 	private VendorRepository vendorRepository;
+	@Mock
+	private BlockedEmailRepository blockedEmailRepository;
 
 	private final PasswordEncoder encoder = new BCryptPasswordEncoder(4);
 	private AuthService authService;
 
 	@BeforeEach
 	void setUp() {
-		authService = new AuthService(userRepository, vendorRepository, encoder, "admin@shop.local", "Adm1n-secret");
+		authService = new AuthService(userRepository, vendorRepository, blockedEmailRepository, encoder,
+				"admin@shop.local", "Adm1n-secret");
 	}
 
 	private User userWithPassword(String stored) {
@@ -46,6 +50,7 @@ class AuthServiceTest {
 	@Test
 	void userLogin_correctPassword_succeeds() {
 		User user = userWithPassword(encoder.encode("pass123"));
+		when(blockedEmailRepository.existsByEmailIgnoreCase("asha@example.com")).thenReturn(false);
 		when(userRepository.findFirstByEmail("asha@example.com")).thenReturn(Optional.of(user));
 
 		assertTrue(authService.authenticateUser("asha@example.com", "pass123").isPresent());
@@ -54,6 +59,7 @@ class AuthServiceTest {
 	@Test
 	void userLogin_wrongPassword_fails() {
 		User user = userWithPassword(encoder.encode("pass123"));
+		when(blockedEmailRepository.existsByEmailIgnoreCase("asha@example.com")).thenReturn(false);
 		when(userRepository.findFirstByEmail("asha@example.com")).thenReturn(Optional.of(user));
 
 		assertFalse(authService.authenticateUser("asha@example.com", "wrong").isPresent());
@@ -61,14 +67,23 @@ class AuthServiceTest {
 
 	@Test
 	void userLogin_unknownEmail_fails() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("nobody@example.com")).thenReturn(false);
 		when(userRepository.findFirstByEmail("nobody@example.com")).thenReturn(Optional.empty());
 
 		assertFalse(authService.authenticateUser("nobody@example.com", "pass123").isPresent());
 	}
 
 	@Test
+	void userLogin_blockedEmail_fails() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("blocked@example.com")).thenReturn(true);
+
+		assertFalse(authService.authenticateUser("blocked@example.com", "pass123").isPresent());
+	}
+
+	@Test
 	void legacyPlainTextPassword_logsInOnceAndIsUpgradedToBcrypt() {
 		User legacy = userWithPassword("plain123");
+		when(blockedEmailRepository.existsByEmailIgnoreCase("asha@example.com")).thenReturn(false);
 		when(userRepository.findFirstByEmail("asha@example.com")).thenReturn(Optional.of(legacy));
 		when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 

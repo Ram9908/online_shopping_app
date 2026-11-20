@@ -22,4 +22,6 @@ public interface ProductService {
 	
 	List<Product> viewAllByVirtualId(Integer virtualId) throws OnlineShoppingException;
 
+	List<String> listCategories() throws OnlineShoppingException;
+
 }

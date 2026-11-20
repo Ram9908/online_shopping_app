@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1" isELIgnored="false"%>
+<%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,14 +15,23 @@
         <div class="d-flex">
             <div class="m-2"> 
                 <img style="border-radius: 60px; height: 40px; width: 40px" src="https://t4.ftcdn.net/jpg/06/22/16/09/240_F_622160930_eg05Gu6D58YApICIw9q8ZyuLsVQlcYmP.jpg">
-            	<select class="bg-warning p-1 rounded text-light" name="All Categories" onchange="window.location.href=this.value">
-            		<option value="view/all/products">All Categories</option>
-	                <option value="/p/category/womenwear">Womens Wear</option> 
-	                <option value="/p/category/menswear">Mens Wear</option>  
-	                <option value="/p/category/kidswear">Kids Wear</option> 
-	                <option value="/p/category/watches">Watches</option> 
-	                <option value="/p/category/electronics">Electronics</option> 
-	                <option value="/p/category/footwear">FootWear</option> 
+            	<select class="bg-warning p-1 rounded text-light" name="All Categories"
+            	        onchange="if (this.value) { window.location.href = this.value; }">
+            		<option value="" selected disabled hidden>All Categories</option>
+	                <%
+	                	List<String> vendorCategories = (List<String>) request.getAttribute("categories");
+	                	if (vendorCategories != null) {
+	                		for (String cat : vendorCategories) {
+	                			if (cat == null || cat.trim().isEmpty()) {
+	                				continue;
+	                			}
+	                			String label = cat.substring(0, 1).toUpperCase() + cat.substring(1);
+	                %>
+	                <option value="<%= request.getContextPath() %>/p/category/<%= cat %>"><%= label %></option>
+	                <%
+	                		}
+	                	}
+	                %>
                 </select>
             </div>
         </div>
@@ -29,22 +39,7 @@
         
     </div>
 
-    <div class="d-flex bg-secondary p-2 justify-content-between text-light">
-        <div class="m-2 text-light">
-            <span class="m-2">Home</span>
-        </div>
-        <div>
-            <form class="forms" action="/p/{productName}" method="get">
-        		<input type="search" name="productName" placeholder="Search here"/>
-    		</form>
-        </div>
-        <div class="d-flex">
-            <div class="d-flex">
-	            <span class="m-2 border-colour-dark"><a href="view/all/products" class="text-decoration-none text-light mx-3">Product view</a></span>
-	            <span class="m-2 border-colour-dark"><a href="product_details.jsp" class="text-decoration-none text-light mx-3">Product</a></span>
-	        </div>
-        </div>
-    </div>
+    <jsp:include page="vendor_nav.jsp"/>
 
     <div class="back bg-gradient-primary d-flex">
         <div class="m">

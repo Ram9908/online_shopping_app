@@ -23,6 +23,10 @@ public class Vendor {
 	private String password;
 	@Column(name="phone")
 	private String phone;
+
+	/** 0 = no warning yet; 1+ = already warned (next action deletes). */
+	@Column(name = "warning_count")
+	private Integer warningCount = 0;
 	
 
 	@ManyToOne
@@ -102,11 +106,18 @@ public class Vendor {
 		this.role = role;
 	}
 
+	public Integer getWarningCount() {
+		return warningCount == null ? 0 : warningCount;
+	}
+
+	public void setWarningCount(Integer warningCount) {
+		this.warningCount = warningCount;
+	}
 
 	@Override
 	public String toString() {
 		return "Vendor [vendorId=" + vendorId + ", vendorName=" + vendorName + ", email=" + email + ", password="
-				+ password + ", phone=" + phone + ", role=" + role + "]";
+				+ password + ", phone=" + phone + ", warningCount=" + warningCount + ", role=" + role + "]";
 	}
 
 

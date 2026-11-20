@@ -13,6 +13,9 @@ import com.genpact.online_shopping_app.repository.RoleRepository;
 import com.genpact.online_shopping_app.service.AuthService;
 import com.genpact.online_shopping_app.service.UserService;
 import com.genpact.online_shopping_app.service.VendorService;
+import com.genpact.online_shopping_app.util.FlashMessages;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class RegistrationController {
@@ -32,16 +35,23 @@ public class RegistrationController {
 
 	@PostMapping("/signup")
 	public ModelAndView registerUser(@RequestParam String name, @RequestParam String email,
-			@RequestParam String phone, @RequestParam String password, @RequestParam String role) {
+			@RequestParam String phone, @RequestParam String password, @RequestParam String role,
+			HttpSession session) {
 		ModelAndView mv = new ModelAndView();
 		if (name.isBlank() || email.isBlank() || password.length() < 6) {
-			mv.addObject("error", "Name and email are required and the password needs at least 6 characters.");
-			mv.setViewName("errorPage_view");
+			FlashMessages.error(session,
+					"Name and email are required and the password needs at least 6 characters.");
+			mv.setViewName("redirect:/register.jsp");
+			return mv;
+		}
+		if (authService.isEmailBlocked(email)) {
+			FlashMessages.error(session, "This email has been blocked and cannot be used to register.");
+			mv.setViewName("redirect:/register.jsp");
 			return mv;
 		}
 		if (authService.emailInUse(email)) {
-			mv.addObject("error", "Email id already exists");
-			mv.setViewName("errorPage_view");
+			FlashMessages.error(session, "Email id already exists.");
+			mv.setViewName("redirect:/register.jsp");
 			return mv;
 		}
 		try {
@@ -53,12 +63,11 @@ public class RegistrationController {
 				Role r = roleRepository.findById(102).orElseThrow();
 				vendorService.register(new Vendor(name, email, hashed, phone, r));
 			}
-			mv.addObject("successMessage", "Registration successful! You can now login.");
-			mv.addObject("redirectUrl", "/login.jsp");
-			mv.setViewName("success");
+			FlashMessages.success(session, "Registration successful! You can now login.");
+			mv.setViewName("redirect:/login.jsp");
 		} catch (OnlineShoppingException e) {
-			mv.addObject("error", "An error occurred during registration: " + e.getMessage());
-			mv.setViewName("errorPage_view");
+			FlashMessages.error(session, "An error occurred during registration: " + e.getMessage());
+			mv.setViewName("redirect:/register.jsp");
 		}
 		return mv;
 	}

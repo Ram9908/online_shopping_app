@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.genpact.online_shopping_app.entity.Address;
@@ -23,6 +22,7 @@ import com.genpact.online_shopping_app.service.OrderService;
 import com.genpact.online_shopping_app.service.ProductService;
 import com.genpact.online_shopping_app.service.UserService;
 import com.genpact.online_shopping_app.service.VendorService;
+import com.genpact.online_shopping_app.util.FlashMessages;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -54,36 +54,36 @@ public class AdminController {
     }
 
     @GetMapping("/add/vendor")
-    public ModelAndView vendorsList() {
+    public ModelAndView vendorsList(HttpSession session) {
         ModelAndView mv = new ModelAndView();
         try {
             List<Vendor> vendorList = vendorService.getAllVendors();
             mv.setViewName("admin_vendors_view");
             mv.addObject("vendorList", vendorList);
         } catch (OnlineShoppingException e) {
-            mv.addObject("error", "Failed to fetch vendor list: " + e.getMessage());
-            mv.setViewName("errorPage_view");
+            FlashMessages.error(session, "Failed to fetch vendor list: " + e.getMessage());
+            mv.setViewName("redirect:/admin");
         }
         return mv;
     }
 
     @GetMapping("/add/user")
-    public ModelAndView usersList() {
+    public ModelAndView usersList(HttpSession session) {
         ModelAndView mv = new ModelAndView();
         try {
             List<User> userList = userService.getAllUsers();
             mv.setViewName("admin_users_view");
             mv.addObject("userList", userList);
         } catch (OnlineShoppingException e) {
-            mv.addObject("error", "Failed to fetch user list: " + e.getMessage());
-            mv.setViewName("errorPage_view");
+            FlashMessages.error(session, "Failed to fetch user list: " + e.getMessage());
+            mv.setViewName("redirect:/admin");
         }
         return mv;
     }
 
     
     @GetMapping("/orders")
-    public ModelAndView viewAllOrders(ModelAndView mv) {
+    public ModelAndView viewAllOrders(ModelAndView mv, HttpSession session) {
     	
         try {
         	
@@ -104,21 +104,21 @@ public class AdminController {
               
              
         } catch (OnlineShoppingException e) {
-            mv.addObject("error", "Failed to fetch order list: " + e.getMessage());
-            mv.setViewName("errorPage_view");
+            FlashMessages.error(session, "Failed to fetch order list: " + e.getMessage());
+            mv.setViewName("redirect:/admin");
         }
         return mv;
     }
     @GetMapping("view/product/admin")
-    public ModelAndView viewAllProducts() {            // user can view all the produts.
+    public ModelAndView viewAllProducts(HttpSession session) {
         ModelAndView mv = new ModelAndView();
         try {
             mv.setViewName("admin_product_view");
             List<Product> productList = productService.viewAllProducts();
             mv.addObject("productList", productList);
         } catch (OnlineShoppingException e) {
-            mv.addObject("error", "An error occurred while fetching products: " + e.getMessage());
-            mv.setViewName("errorPage_view");
+            FlashMessages.error(session, "An error occurred while fetching products: " + e.getMessage());
+            mv.setViewName("redirect:/admin");
         }
         return mv;
     }

@@ -18,7 +18,20 @@
     <div class="container login-container col-4">
         <div class="card p-4">
             <h1 class="text-center">Login</h1>
-            <form action="login" method="post" onsubmit="reloadPage()">
+            <jsp:include page="message_banner.jsp"/>
+            <% if ("1".equals(request.getParameter("signedOut"))) { %>
+            <div class="alert alert-success js-auto-hide-alert" role="alert">Signed out successfully.</div>
+            <script>
+            setTimeout(function () {
+                document.querySelectorAll(".js-auto-hide-alert").forEach(function (el) {
+                    el.style.transition = "opacity 0.4s ease";
+                    el.style.opacity = "0";
+                    setTimeout(function () { el.remove(); }, 400);
+                });
+            }, 2000);
+            </script>
+            <% } %>
+            <form action="login" method="post">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="email" placeholder="Enter email here" name="email" required>
@@ -42,13 +55,5 @@
             <p class="text-center mt-3">Don't have an account? <a href="register.jsp">Sign up here</a></p>
         </div>
     </div>
-
-    <script>
-        function reloadPage() {
-            setTimeout(function() {
-                location.reload();
-            }, 1000); // Reload after 1 second
-        }
-    </script>
 </body>
 </html>

@@ -14,6 +14,7 @@ import com.genpact.online_shopping_app.entity.OrderEntity;
 import com.genpact.online_shopping_app.entity.User;
 import com.genpact.online_shopping_app.service.CheckoutService;
 import com.genpact.online_shopping_app.service.OrderService;
+import com.genpact.online_shopping_app.util.FlashMessages;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -44,31 +45,37 @@ public class OrderController {
 		if (activeUser == null) {
 			return new ModelAndView("redirect:/login.jsp");
 		}
-		ModelAndView mv = new ModelAndView();
 		try {
 			Address address = new Address(name, addressLine1, addressLine2, city, state, zipCode,
 					activeUser.getUserId());
 			checkoutService.checkout(activeUser.getUserId(), address);
-			mv.addObject("viewOrder", "Order Placed Successfully");
-			mv.setViewName("order_details");
+			FlashMessages.success(session, "Order placed successfully.");
+			return new ModelAndView("redirect:/ordersView");
 		} catch (IllegalStateException e) {
-			mv.addObject("error", e.getMessage());
-			mv.setViewName("errorPage_view");
+			FlashMessages.error(session, e.getMessage());
+			return new ModelAndView("redirect:/view/all/cart");
 		}
-		return mv;
 	}
 
 	/** Cancels one of the logged-in user's own orders. */
 	@GetMapping("/delete/{orderId}")
-	public String deleteOrder(@PathVariable Integer orderId, HttpSession session) {
+	public String deleteOrder(@PathVariable Integer orderId,
+			@RequestParam(required = false) String cancelReason, HttpSession session) {
 		User activeUser = (User) session.getAttribute("activeUser");
 		if (activeUser == null) {
 			return "redirect:/login.jsp";
+		}
+		if (cancelReason == null || cancelReason.trim().isEmpty()) {
+			FlashMessages.error(session, "Please select a reason to cancel the order.");
+			return "redirect:/ordersView";
 		}
 		List<OrderEntity> mine = orderService.getOrdersByVirtualId(activeUser.getUserId());
 		boolean owns = mine.stream().anyMatch(o -> o.getOrderId() == orderId);
 		if (owns) {
 			orderService.removeOrderById(orderId);
+			FlashMessages.success(session, "Order cancelled. Reason: " + cancelReason.trim());
+		} else {
+			FlashMessages.error(session, "Order not found.");
 		}
 		return "redirect:/ordersView";
 	}

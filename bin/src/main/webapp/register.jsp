@@ -17,6 +17,7 @@
     <div class="container registration-container col-4 mt-10">
         <div class="card p-4">
             <h1 class="text-center">Registration Form</h1>
+            <jsp:include page="message_banner.jsp"/>
             <form id="registrationForm" action="signup" method="post">
                 <div class="mb-3">
                     <label for="name" class="form-label">Name:</label>
@@ -45,6 +46,7 @@
                     <button type="submit" class="btn btn-primary">Register</button>
                 </div>
             </form>
+            <p class="text-center mt-3">Already have an account? <a href="login.jsp">Login here</a></p>
         </div>
     </div>
 </body>

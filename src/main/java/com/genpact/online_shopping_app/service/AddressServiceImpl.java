@@ -28,4 +28,12 @@ public class AddressServiceImpl implements AddressService{
 		return addressRepository.findAll();
 	}
 
+	@Override
+	public void deleteByVirtualId(Integer virtualId) {
+		List<Address> addresses = addressRepository.findByVirtualId(virtualId);
+		if (addresses != null && !addresses.isEmpty()) {
+			addressRepository.deleteAll(addresses);
+		}
+	}
+
 }

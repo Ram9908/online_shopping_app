@@ -20,6 +20,7 @@ import com.genpact.online_shopping_app.service.AddressService;
 import com.genpact.online_shopping_app.service.CartService;
 import com.genpact.online_shopping_app.service.OrderService;
 import com.genpact.online_shopping_app.service.ProductService;
+import com.genpact.online_shopping_app.util.FlashMessages;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -39,14 +40,32 @@ public class UserController {
 		return new ModelAndView("redirect:/login.jsp");
 	}
 
-	private static ModelAndView error(String message) {
-		ModelAndView mv = new ModelAndView("errorPage_view");
-		mv.addObject("error", message);
+	private static ModelAndView flashError(HttpSession session, String message, String redirectPath) {
+		FlashMessages.error(session, message);
+		return new ModelAndView("redirect:" + redirectPath);
+	}
+
+	private static ModelAndView flashSuccess(HttpSession session, String message, String redirectPath) {
+		FlashMessages.success(session, message);
+		return new ModelAndView("redirect:" + redirectPath);
+	}
+
+	@GetMapping("/user")
+	public ModelAndView userHome(HttpSession session) {
+		if (session.getAttribute("activeUser") == null) {
+			return new ModelAndView("redirect:/login.jsp");
+		}
+		ModelAndView mv = new ModelAndView("user_index");
+		try {
+			mv.addObject("categories", productService.listCategories());
+		} catch (OnlineShoppingException e) {
+			mv.addObject("categories", List.of());
+		}
 		return mv;
 	}
 
 	@GetMapping("view/all")
-	public ModelAndView viewAllProducts() {
+	public ModelAndView viewAllProducts(HttpSession session) {
 		ModelAndView mv = new ModelAndView();
 		try {
 			List<Product> inStock = new ArrayList<>();
@@ -58,7 +77,7 @@ public class UserController {
 			mv.setViewName("all_products_user_view");
 			mv.addObject("productList", inStock);
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while fetching products: " + e.getMessage());
+			return flashError(session, "An error occurred while fetching products: " + e.getMessage(), "/user");
 		}
 		return mv;
 	}
@@ -74,10 +93,10 @@ public class UserController {
 		try {
 			Product product = productService.viewByProductId(productId).orElse(null);
 			if (product == null) {
-				return error("Product not found.");
+				return flashError(session, "Product not found.", "/view/all");
 			}
 			if (quantity == null || quantity < 1) {
-				return error("Quantity must be at least 1.");
+				return flashError(session, "Quantity must be at least 1.", "/view/all");
 			}
 			Integer userId = activeUser.getUserId(); // always the logged-in user, never a request parameter
 			Cart existing = null;
@@ -89,8 +108,8 @@ public class UserController {
 			}
 			int newQuantity = quantity + (existing == null ? 0 : existing.getQuantity());
 			if (newQuantity > product.getStockQuantity()) {
-				return error("Only " + product.getStockQuantity() + " of '" + product.getProductName()
-						+ "' in stock.");
+				return flashError(session, "Only " + product.getStockQuantity() + " of '" + product.getProductName()
+						+ "' in stock.", "/view/all");
 			}
 			if (existing != null) {
 				existing.setQuantity(newQuantity);
@@ -98,11 +117,9 @@ public class UserController {
 			} else {
 				cartService.addToCart(new Cart(productId, userId, quantity));
 			}
-			ModelAndView mv = new ModelAndView("addToCart_view");
-			mv.addObject("userCart", "Cart Added Successfully");
-			return mv;
+			return flashSuccess(session, "Cart added successfully.", "/view/all");
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while adding to cart: " + e.getMessage());
+			return flashError(session, "An error occurred while adding to cart: " + e.getMessage(), "/view/all");
 		}
 	}
 
@@ -129,7 +146,7 @@ public class UserController {
 			mv.addObject("totalQuantity", total);
 			return mv;
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while fetching cart items: " + e.getMessage());
+			return flashError(session, "An error occurred while fetching cart items: " + e.getMessage(), "/user");
 		}
 	}
 
@@ -143,14 +160,13 @@ public class UserController {
 			for (Cart cart : cartService.viewAllByVirtualId(activeUser.getUserId())) {
 				if (cart.getCartId().equals(cartId)) {
 					cartService.deleteCartById(cartId);
-					ModelAndView mv = new ModelAndView("delete_message_view");
-					mv.addObject("deleted", "Cart deleted successfully");
-					return mv;
+					return flashSuccess(session, "Cart deleted successfully.", "/view/all/cart");
 				}
 			}
-			return error("Cart item not found.");
+			return flashError(session, "Cart item not found.", "/view/all/cart");
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while deleting the cart item: " + e.getMessage());
+			return flashError(session, "An error occurred while deleting the cart item: " + e.getMessage(),
+					"/view/all/cart");
 		}
 	}
 
@@ -166,21 +182,22 @@ public class UserController {
 				if (cart.getCartId().equals(cartId)) {
 					Product product = productService.viewByProductId(cart.getvProductId()).orElse(null);
 					if (product == null) {
-						return error("Product is no longer available.");
+						return flashError(session, "Product is no longer available.", "/view/all/cart");
 					}
 					if (quantity == null || quantity < 1 || quantity > product.getStockQuantity()) {
-						return error("Quantity must be between 1 and " + product.getStockQuantity() + ".");
+						return flashError(session,
+								"Quantity must be between 1 and " + product.getStockQuantity() + ".",
+								"/view/all/cart");
 					}
 					cart.setQuantity(quantity);
 					cartService.addToCart(cart);
-					ModelAndView mv = new ModelAndView("delete_message_view");
-					mv.addObject("updated", "Cart Updated successfully");
-					return mv;
+					return new ModelAndView("redirect:/view/all/cart");
 				}
 			}
-			return error("Cart item not found.");
+			return flashError(session, "Cart item not found.", "/view/all/cart");
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while updating the cart: " + e.getMessage());
+			return flashError(session, "An error occurred while updating the cart: " + e.getMessage(),
+					"/view/all/cart");
 		}
 	}
 
@@ -201,29 +218,30 @@ public class UserController {
 			mv.addObject("addressList", addressList);
 			return mv;
 		} catch (OnlineShoppingException e) {
-			return error("Failed to fetch order list: " + e.getMessage());
+			return flashError(session, "Failed to fetch order list: " + e.getMessage(), "/user");
 		}
 	}
 
 	@GetMapping("/products/category/{category}")
-	public ModelAndView searchProductsByCategory(@PathVariable String category) {
+	public ModelAndView searchProductsByCategory(@PathVariable String category, HttpSession session) {
 		try {
 			ModelAndView mv = new ModelAndView("all_products_user_view");
 			mv.addObject("productList", productService.searchProductByCategory(category));
 			return mv;
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while searching products by category: " + e.getMessage());
+			return flashError(session, "An error occurred while searching products by category: " + e.getMessage(),
+					"/user");
 		}
 	}
 
-	@GetMapping("/productsearch/{productName}")
-	public ModelAndView searchProductByName(@RequestParam String productName) {
+	@GetMapping({"/productsearch", "/productsearch/{productName}"})
+	public ModelAndView searchProductByName(@RequestParam String productName, HttpSession session) {
 		try {
 			ModelAndView mv = new ModelAndView("all_products_user_view");
 			mv.addObject("productList", productService.searchByProductName(productName));
 			return mv;
 		} catch (OnlineShoppingException e) {
-			return error("An error occurred while searching products: " + e.getMessage());
+			return flashError(session, "An error occurred while searching products: " + e.getMessage(), "/user");
 		}
 	}
 }

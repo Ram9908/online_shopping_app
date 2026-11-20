@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.genpact.online_shopping_app.entity.User;
 import com.genpact.online_shopping_app.entity.Vendor;
 import com.genpact.online_shopping_app.service.AuthService;
+import com.genpact.online_shopping_app.util.FlashMessages;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,12 +29,19 @@ public class LoginController {
 			@RequestParam Integer role, HttpSession session, HttpServletRequest request) {
 		ModelAndView mv = new ModelAndView();
 
+		if (authService.isEmailBlocked(email) && role != null && (role == 101 || role == 102)) {
+			FlashMessages.error(session, "This email has been blocked and can no longer be used to log in.");
+			mv.setViewName("redirect:/login.jsp");
+			return mv;
+		}
+
 		if (role == 101) {
 			Optional<User> user = authService.authenticateUser(email, password);
 			if (user.isPresent()) {
-				request.changeSessionId(); // prevent session fixation
+				request.changeSessionId();
 				session.setAttribute("activeUser", user.get());
-				mv.setViewName("user_index");
+				FlashMessages.success(session, "Logged in successfully.");
+				mv.setViewName("redirect:/user");
 				return mv;
 			}
 		} else if (role == 102) {
@@ -41,19 +49,20 @@ public class LoginController {
 			if (vendor.isPresent()) {
 				request.changeSessionId();
 				session.setAttribute("activeVendor", vendor.get());
-				mv.setViewName("vendor_index");
+				FlashMessages.success(session, "Logged in successfully.");
+				mv.setViewName("redirect:/vendor");
 				return mv;
 			}
 		} else if (authService.authenticateAdmin(email, password)) {
 			request.changeSessionId();
 			session.setAttribute("activeAdmin", Boolean.TRUE);
-			mv.setViewName("admin_index");
+			FlashMessages.success(session, "Logged in successfully.");
+			mv.setViewName("redirect:/admin");
 			return mv;
 		}
 
-		mv.addObject("error", "Invalid email, password, or role");
-		mv.setViewName("error_view");
+		FlashMessages.error(session, "Invalid email, password, or role.");
+		mv.setViewName("redirect:/login.jsp");
 		return mv;
-		// Add error handling for invalid role
 	}
 }

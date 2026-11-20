@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -13,8 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.genpact.online_shopping_app.entity.BlockedEmail;
 import com.genpact.online_shopping_app.entity.User;
 import com.genpact.online_shopping_app.entity.Vendor;
+import com.genpact.online_shopping_app.repository.BlockedEmailRepository;
 import com.genpact.online_shopping_app.repository.UserRepository;
 import com.genpact.online_shopping_app.repository.VendorRepository;
 
@@ -29,14 +32,17 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final VendorRepository vendorRepository;
+	private final BlockedEmailRepository blockedEmailRepository;
 	private final PasswordEncoder encoder;
 	private final String adminEmail;
 	private final String adminPasswordHash;
 
-	public AuthService(UserRepository userRepository, VendorRepository vendorRepository, PasswordEncoder encoder,
+	public AuthService(UserRepository userRepository, VendorRepository vendorRepository,
+			BlockedEmailRepository blockedEmailRepository, PasswordEncoder encoder,
 			@Value("${app.admin.email}") String adminEmail, @Value("${app.admin.password:}") String adminPassword) {
 		this.userRepository = userRepository;
 		this.vendorRepository = vendorRepository;
+		this.blockedEmailRepository = blockedEmailRepository;
 		this.encoder = encoder;
 		this.adminEmail = adminEmail;
 		String effective = adminPassword;
@@ -49,8 +55,31 @@ public class AuthService {
 		this.adminPasswordHash = encoder.encode(effective);
 	}
 
+	public static String normalizeEmail(String email) {
+		if (email == null) {
+			return null;
+		}
+		String trimmed = email.trim().toLowerCase(Locale.ROOT);
+		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	public boolean isEmailBlocked(String email) {
+		String normalized = normalizeEmail(email);
+		return normalized != null && blockedEmailRepository.existsByEmailIgnoreCase(normalized);
+	}
+
+	public void blockEmail(String email, String accountType, String reason) {
+		String normalized = normalizeEmail(email);
+		if (normalized == null) {
+			return;
+		}
+		if (!blockedEmailRepository.existsByEmailIgnoreCase(normalized)) {
+			blockedEmailRepository.save(new BlockedEmail(normalized, accountType, reason));
+		}
+	}
+
 	public Optional<User> authenticateUser(String email, String rawPassword) {
-		if (email == null || rawPassword == null) {
+		if (email == null || rawPassword == null || isEmailBlocked(email)) {
 			return Optional.empty();
 		}
 		return userRepository.findFirstByEmail(email)
@@ -61,7 +90,7 @@ public class AuthService {
 	}
 
 	public Optional<Vendor> authenticateVendor(String email, String rawPassword) {
-		if (email == null || rawPassword == null) {
+		if (email == null || rawPassword == null || isEmailBlocked(email)) {
 			return Optional.empty();
 		}
 		return vendorRepository.findFirstByEmail(email)
@@ -77,7 +106,12 @@ public class AuthService {
 	}
 
 	public boolean emailInUse(String email) {
-		return userRepository.existsByEmail(email) || vendorRepository.existsByEmail(email);
+		String normalized = normalizeEmail(email);
+		if (normalized == null) {
+			return false;
+		}
+		return isEmailBlocked(normalized) || userRepository.existsByEmail(email)
+				|| vendorRepository.existsByEmail(email);
 	}
 
 	public String hash(String rawPassword) {

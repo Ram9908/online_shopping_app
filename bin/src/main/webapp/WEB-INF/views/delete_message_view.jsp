@@ -7,6 +7,7 @@
 <title>Delete Product</title>
 </head>
 <body>
+<jsp:include page="vendor_nav.jsp"/>
 	${deleted}
 	${productDelete}
 	${updated}

@@ -20,6 +20,6 @@ public interface OrderService {
 	List<OrderEntity> viewByVirtualCartId(Integer virtualCartId);
 
 	List<OrderEntity> getOrdersByVirtualId(Integer virtualId);
-	
-	
+
+	void removeOrdersByVirtualId(Integer virtualId);
 }

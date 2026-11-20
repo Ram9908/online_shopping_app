@@ -13,6 +13,8 @@ public interface UserService {
 	List<User> getAllUsers() throws OnlineShoppingException;//for admin to view all users
 	
 	void removeUserById(Integer userId) throws OnlineShoppingException;//for admin to delete all users
+
+	Optional<User> findById(Integer userId) throws OnlineShoppingException;
 	
 	List<User> viewAllUsersByEmailAndPassword(String email, String password) throws OnlineShoppingException;
 	

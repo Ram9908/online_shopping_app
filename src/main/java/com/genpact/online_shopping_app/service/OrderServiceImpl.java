@@ -48,4 +48,12 @@ public class OrderServiceImpl implements OrderService{
 		return orderRepository.findByVirtualId(virtualId);
 	}
 
+	@Override
+	public void removeOrdersByVirtualId(Integer virtualId) {
+		List<OrderEntity> orders = orderRepository.findByVirtualId(virtualId);
+		if (orders != null && !orders.isEmpty()) {
+			orderRepository.deleteAll(orders);
+		}
+	}
+
 }

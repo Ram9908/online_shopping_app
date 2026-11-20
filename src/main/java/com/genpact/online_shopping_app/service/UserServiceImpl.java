@@ -42,6 +42,11 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
+	public Optional<User> findById(Integer userId) throws OnlineShoppingException {
+		return userRepository.findById(userId);
+	}
+
+	@Override
 	public User saveUser(User user) {
 		return userRepository.save(user);
 	}

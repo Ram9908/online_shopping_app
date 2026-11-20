@@ -22,6 +22,9 @@ public interface ProductRepository extends CrudRepository<Product, Integer> {
 
 	List<Product> findAllByVirtualId(Integer virtualId);
 
+	@Query("SELECT DISTINCT p.category FROM Product p WHERE p.category IS NOT NULL AND p.category <> ''")
+	List<String> findDistinctCategories();
+
 	/** Row-locks the product so two concurrent checkouts cannot oversell the same stock. */
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT p FROM Product p WHERE p.productId = :id")

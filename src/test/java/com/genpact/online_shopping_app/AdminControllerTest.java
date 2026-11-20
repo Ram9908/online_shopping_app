@@ -22,6 +22,8 @@ import com.genpact.online_shopping_app.exception.OnlineShoppingException;
 import com.genpact.online_shopping_app.service.UserService;
 import com.genpact.online_shopping_app.service.VendorService;
 
+import jakarta.servlet.http.HttpSession;
+
 @ExtendWith(MockitoExtension.class)
 public class AdminControllerTest {
 
@@ -29,6 +31,8 @@ public class AdminControllerTest {
     private VendorService vendorService;
     @Mock
     private UserService userService;
+    @Mock
+    private HttpSession session;
 
     @InjectMocks
     private AdminController adminController;
@@ -52,7 +56,7 @@ public class AdminControllerTest {
     @Test
     public void testVendorsList_Success() throws OnlineShoppingException {
         when(vendorService.getAllVendors()).thenReturn(vendorList);
-        ModelAndView mv = adminController.vendorsList();
+        ModelAndView mv = adminController.vendorsList(session);
         assertEquals("admin_vendors_view", mv.getViewName());
         List<Vendor> returnedVendorList = (List<Vendor>) mv.getModel().get("vendorList");
         assertEquals(vendorList, returnedVendorList);
@@ -60,7 +64,7 @@ public class AdminControllerTest {
     @Test
     public void testUsersList_Success() throws OnlineShoppingException {
         when(userService.getAllUsers()).thenReturn(userList);
-        ModelAndView mv = adminController.usersList();
+        ModelAndView mv = adminController.usersList(session);
         assertEquals("admin_users_view", mv.getViewName());
         List<User> returnedUserList = (List<User>) mv.getModel().get("userList");
         assertEquals(userList, returnedUserList);

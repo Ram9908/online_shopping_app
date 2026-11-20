@@ -10,4 +10,6 @@ public interface AddressService {
 	List<Address> viewAllByVirtualId(Integer virtualId);
 
 	List<Address> viewAllAddress();
+
+	void deleteByVirtualId(Integer virtualId);
 }

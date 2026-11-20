@@ -1,6 +1,7 @@
 package com.genpact.online_shopping_app.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,16 @@ public class VendorServiceImpl implements VendorService {
 	@Override
 	public List<Vendor> getAllVendors() throws OnlineShoppingException{
 		return (List<Vendor>) vendorRepository.findAll();
+	}
+
+	@Override
+	public Optional<Vendor> findById(Integer vendorId) throws OnlineShoppingException {
+		return vendorRepository.findById(vendorId);
+	}
+
+	@Override
+	public Vendor save(Vendor vendor) throws OnlineShoppingException {
+		return vendorRepository.save(vendor);
 	}
 
 	@Override
