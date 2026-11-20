@@ -35,3 +35,4 @@ build/
 # local config and uploads
 .env
 uploads/
+data/

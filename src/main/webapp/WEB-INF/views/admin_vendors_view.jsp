@@ -22,6 +22,7 @@
     </style>
 </head>
 <body>
+    <jsp:include page="admin_nav.jsp"/>
     <div class="container mt-5">
         <h2 class="text-center text-primary">Admin - Vendors</h2>
         <table class="table table-bordered table-striped">

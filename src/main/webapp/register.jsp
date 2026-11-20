@@ -17,7 +17,7 @@
     <div class="container registration-container col-4 mt-10">
         <div class="card p-4">
             <h1 class="text-center">Registration Form</h1>
-            <form id="registrationForm" action="signup" method="post" onsubmit="reloadPage()">
+            <form id="registrationForm" action="signup" method="post">
                 <div class="mb-3">
                     <label for="name" class="form-label">Name:</label>
                     <input type="text" class="form-control" id="name" name="name" required>
@@ -32,7 +32,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password:</label>
-                    <input type="password" class="form-control" id="password" name="password" pattern="(?=.*[A-Z])[a-zA-Z0-9]{8,}" title="Password must be at least 8 characters long, contain only alphabets and digits, and include at least one capital letter" required>
+                    <input type="password" class="form-control" id="password" name="password" pattern="(?=.*[A-Z])[A-Za-z0-9!@#$%^&*_\-]{8,}" title="Password must be at least 8 characters long, include at least one capital letter, and may contain letters, digits, and symbols like - ! @ # $" required>
                 </div>
                 <div class="mb-3">
                     <label for="role" class="form-label">Role:</label>
@@ -47,13 +47,5 @@
             </form>
         </div>
     </div>
-<script>
-        
-        function reloadPage() {
-            setTimeout(function() {
-                location.reload();
-            }, 1000); // Reload after 1 second
-        }
-    </script>
 </body>
 </html>

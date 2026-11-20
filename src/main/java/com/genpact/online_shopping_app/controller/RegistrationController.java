@@ -54,6 +54,7 @@ public class RegistrationController {
 				vendorService.register(new Vendor(name, email, hashed, phone, r));
 			}
 			mv.addObject("successMessage", "Registration successful! You can now login.");
+			mv.addObject("redirectUrl", "/login.jsp");
 			mv.setViewName("success");
 		} catch (OnlineShoppingException e) {
 			mv.addObject("error", "An error occurred during registration: " + e.getMessage());

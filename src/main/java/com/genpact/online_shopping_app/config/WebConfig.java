@@ -55,6 +55,6 @@ public class WebConfig implements WebMvcConfigurer {
 				response.sendRedirect(request.getContextPath() + "/login.jsp");
 				return false;
 			}
-		}).addPathPatterns("/add/vendor", "/add/user", "/orders", "/view/product/admin");
+		}).addPathPatterns("/admin", "/add/vendor", "/add/user", "/orders", "/view/product/admin");
 	}
 }

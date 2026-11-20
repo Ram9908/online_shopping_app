@@ -45,6 +45,14 @@ public class AdminController {
     private AddressService addressService;
     
 
+    @GetMapping("/admin")
+    public String adminHome(HttpSession session) {
+        if (session.getAttribute("activeAdmin") == null) {
+            return "redirect:/login.jsp";
+        }
+        return "admin_index";
+    }
+
     @GetMapping("/add/vendor")
     public ModelAndView vendorsList() {
         ModelAndView mv = new ModelAndView();

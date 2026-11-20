@@ -27,6 +27,7 @@
     </style>
 </head>
 <body>
+<jsp:include page="admin_nav.jsp"/>
 
 <h2>All Products</h2>
 

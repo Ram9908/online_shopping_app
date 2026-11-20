@@ -25,7 +25,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Enter password here" name="password" pattern="(?=.*[A-Z])[a-zA-Z0-9]{8,}" title="Password must be at least 8 characters long, contain only alphabets and digits, and include at least one capital letter" required>
+                    <input type="password" class="form-control" id="password" placeholder="Enter password here" name="password" required>
                 </div>
                 <div class="mb-3">
                     <label for="role" class="form-label">Role</label>

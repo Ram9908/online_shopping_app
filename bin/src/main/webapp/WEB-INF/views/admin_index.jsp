@@ -10,21 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="d-flex bg-info p-1 justify-content-between">
-       
-    </div>
-
-    <div class="d-flex bg-secondary p-2 justify-content-between text-light">
-        <div class="m-2 text-light">
-            <span class="m-2">Home</span>
-        </div>
-        <div class="d-flex">
-        		<span class="m-2 border-colour-dark"><a href="/view/product/admin" class="text-decoration-none  text-light mx-3">Products</a></span>
-                <span class="m-2 border-colour-dark"><a href="/add/vendor" class="text-decoration-none  text-light mx-3">Vendors</a></span>
-                <span class="m-2 border-colour-dark"><a href="/add/user" class="text-decoration-none  text-light mx-3">Users</a></span>
-                <span class="m-2 border-colour-dark"><a href="/orders" class="text-decoration-none  text-light mx-3">Orders</a></span>           
-        </div>
-    </div>
+    <jsp:include page="admin_nav.jsp"/>
 
     <div class="back bg-gradient-primary d-flex">
         <div class="m">
