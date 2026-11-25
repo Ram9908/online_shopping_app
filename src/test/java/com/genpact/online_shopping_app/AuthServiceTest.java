@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -106,5 +107,47 @@ class AuthServiceTest {
 		String hashed = authService.hash("secret1");
 		assertFalse(hashed.equals("secret1"));
 		assertEquals(60, hashed.length());
+	}
+
+	@Test
+	void emailInUse_trueWhenBlocked() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("gone@example.com")).thenReturn(true);
+
+		assertTrue(authService.emailInUse("gone@example.com"));
+	}
+
+	@Test
+	void emailInUse_trueWhenUserExists() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("asha@example.com")).thenReturn(false);
+		when(userRepository.existsByEmail("asha@example.com")).thenReturn(true);
+
+		assertTrue(authService.emailInUse("asha@example.com"));
+	}
+
+	@Test
+	void emailInUse_falseWhenAvailable() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("new@example.com")).thenReturn(false);
+		when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+		when(vendorRepository.existsByEmail("new@example.com")).thenReturn(false);
+
+		assertFalse(authService.emailInUse("new@example.com"));
+	}
+
+	@Test
+	void blockEmail_savesNormalizedEmailOnce() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("bad@example.com")).thenReturn(false);
+
+		authService.blockEmail("  Bad@Example.com ", "USER", "Fraud");
+
+		verify(blockedEmailRepository).save(any());
+	}
+
+	@Test
+	void blockEmail_skipsWhenAlreadyBlocked() {
+		when(blockedEmailRepository.existsByEmailIgnoreCase("bad@example.com")).thenReturn(true);
+
+		authService.blockEmail("bad@example.com", "USER", "Fraud");
+
+		verify(blockedEmailRepository, never()).save(any());
 	}
 }

@@ -8,7 +8,7 @@ A role-based e-commerce web application built with Spring Boot. Shoppers can bro
 - Spring Boot 3.2
 - Spring MVC and JSP
 - Spring Data JPA
-- MySQL or H2
+- MySQL
 - Maven Wrapper
 - Docker Compose
 
@@ -24,25 +24,7 @@ A role-based e-commerce web application built with Spring Boot. Shoppers can bro
 
 ## Run locally
 
-You need JDK 17 or later. Maven is included through the Maven Wrapper.
-
-### Option 1: Run with H2
-
-H2 is an in-memory database. Its data resets when the application restarts.
-
-**Windows PowerShell:**
-
-```powershell
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=h2"
-```
-
-**macOS or Linux:**
-
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
-```
-
-### Option 2: Run with MySQL in Docker
+You need JDK 17 or later. Maven is included through the Maven Wrapper. The app uses **MySQL only**.
 
 1. Copy `.env.example` to `.env` and set your database password.
 2. Start the database:
@@ -99,7 +81,7 @@ Register a shopper or vendor through the sign-up page.
 |---|---|---|
 | `DB_URL` | `jdbc:mysql://localhost:3307/online_shopping_application?createDatabaseIfNotExist=true` | JDBC connection URL |
 | `DB_USERNAME` | `root` | Database username |
-| `DB_PASSWORD` | None | Database password; required for MySQL |
+| `DB_PASSWORD` | None | Database password (required) |
 | `ADMIN_EMAIL` | `admin@shop.local` | Admin account email |
 | `ADMIN_PASSWORD` | Randomly generated if empty | Admin account password |
 | `UPLOAD_DIR` | `uploads` | Directory used for product images |
